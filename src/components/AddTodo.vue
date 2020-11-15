@@ -22,7 +22,6 @@ export default {
   },
   methods: {
     ...mapActions(["addTodo"]),
-
     onSubmit(e) {
       e.preventDefault();
       const newTodo = {
@@ -47,7 +46,8 @@ input[type="text"] {
   border: 1px solid #41b883;
   outline: 0;
 }
-input[type="submit"] {
+input[type="submit"],
+button {
   flex: 2;
   background: #41b883;
   color: #fff;

@@ -1,34 +1,42 @@
+
+
 <template>
-  <div id="app">
-    <div class="container">
-      <AddTodo />
-      <Todos />
+  <div>
+    <div v-if="alert.message" :class="`alert ${alert.type}`">
+      {{ alert.message }}
     </div>
+    <b-overlay
+      :show="showLoader"
+      spinner-variant="primary"
+      centered
+      rounded="sm"
+      ><router-view></router-view
+    ></b-overlay>
   </div>
 </template>
 
 <script>
-import Todos from "./components/Todos.vue";
-import AddTodo from "./components/AddTodo.vue";
+import { mapState, mapActions } from "vuex";
 export default {
   name: "app",
-  components: {
-    Todos,
-    AddTodo,
+  computed: {
+    ...mapState({
+      alert: (state) => state.alert,
+      showLoader: (state) => {
+        return state.todos.showLoader;
+      },
+    }),
+  },
+  methods: {
+    ...mapActions({
+      clearAlert: "alert/clear",
+    }),
+  },
+  watch: {
+    $route() {
+      // clear alert on location change
+      this.clearAlert();
+    },
   },
 };
 </script>
-
-<style>
-body {
-  font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
-  line-height: 1.6;
-  background: #e8f7f0;
-}
-.container {
-  max-width: 500px;
-  margin: auto;
-  overflow: auto;
-  padding: 0 2rem;
-}
-</style>
