@@ -9,15 +9,22 @@ const actions = {
     commit("registerRequest");
     userService.register(
       user,
-      () => {
-        router.push("/login");
-        setTimeout(() => {
-          dispatch("alert/success", "Registration successful", { root: true });
-        });
+      (response) => {
+        if (response.data["errMsg"]) {
+          dispatch("alert/error", response.data["errMsg"], { root: true });
+          commit("registerFailure");
+        } else {
+          router.push("/login");
+          setTimeout(() => {
+            dispatch("alert/success", "Registration successful", { root: true });
+          });
+          commit("registerSuccess");
+        }
       },
-      () => {
+      (error) => {
+        console.log("Error --> ", error);
         commit("registerFailure");
-        dispatch("alert/error", "Unable to register, please try again", { root: true });
+        dispatch("alert/error", error.msg, { root: true });
       }
     );
   },
@@ -27,12 +34,18 @@ const actions = {
     userService.login(
       emailId,
       password,
-      (user) => {
-        commit("loginSuccess", emailId);
-        localStorage.setItem("token", user.data);
-        localStorage.setItem("user", emailId);
-        dispatch("dismissLoader", undefined, { root: true });
-        router.push("/todos");
+      (response) => {
+        if (response.data["errMsg"]) {
+          dispatch("alert/error", response.data["errMsg"], { root: true });
+          dispatch("dismissLoader", undefined, { root: true });
+          commit("loginFailure", response.data["errMsg"]);
+        } else {
+          commit("loginSuccess", emailId);
+          localStorage.setItem("token", response.data);
+          localStorage.setItem("user", emailId);
+          dispatch("dismissLoader", undefined, { root: true });
+          router.push("/todos");
+        }
       },
       (error) => {
         commit("loginFailure", error);
@@ -56,6 +69,9 @@ const mutations = {
     state.status = { registering: true };
   },
   registerFailure() {
+    state.status = { registering: false };
+  },
+  registerSuccess() {
     state.status = { registering: false };
   },
   loginRequest(state, user) {
